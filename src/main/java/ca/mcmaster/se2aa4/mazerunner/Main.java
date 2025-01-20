@@ -9,13 +9,13 @@ import org.apache.logging.log4j.Logger;
 public class Main {
 
     private static final Logger logger = LogManager.getLogger();
-    private static String fileName;
+    private static String filePath;
 
     public static void main(String[] args) {
 
         // CLI Parsing
 
-        System.out.println("**** Reading Command-Line Arguements");
+        logger.info("**** Reading Command-Line Arguments");
 
         Options options = new Options();
         options.addOption("i", true, "Flag to indicate to program that a maze filepath will be provided"); // -i flag
@@ -23,21 +23,25 @@ public class Main {
         CommandLineParser parser = new DefaultParser();
 
         try {
-            CommandLine cmd = parser.parse(options, args); // Parses the command line arguements accordingly
-            fileName = cmd.getOptionValue("i");
-            System.out.println("****** Parsed file name: " + fileName);
+            CommandLine cmd = parser.parse(options, args); // Parses the command line arguments accordingly
+            if (!cmd.hasOption("i")) {
+                throw new ParseException("Error parsing -i flag");
+            }
+            filePath = cmd.getOptionValue("i"); // Stores file path
+            logger.trace("****** Parsed file name: " + filePath);
         } catch (ParseException e) {
-            System.err.println("An error has occurred");
+            logger.error("/!\\\\ An error has occurred while parsing command line arguments /!\\");
+            System.exit(1); // Terminate program if errors with parsing
         }
 
         // Reading parsed file
 
-        System.out.println("** Starting Maze Runner");
+        logger.info("** Starting Maze Runner");
         try {
-            System.out.println("**** Reading the maze from file " + fileName);
-            BufferedReader reader = new BufferedReader(new FileReader(fileName));
+            logger.info("**** Reading the maze from file " + filePath);
+            BufferedReader reader = new BufferedReader(new FileReader(filePath)); // Read from file path supplied
             String line;
-            while ((line = reader.readLine()) != null) {
+            while ((line = reader.readLine()) != null) { // Read file line by line
                 for (int idx = 0; idx < line.length(); idx++) {
                     if (line.charAt(idx) == '#') {
                         System.out.print("WALL ");
@@ -48,10 +52,10 @@ public class Main {
                 System.out.print(System.lineSeparator());
             }
         } catch (Exception e) {
-            System.err.println("/!\\ An error has occured while reading from file /!\\");
+            logger.error("/!\\ An error has occured while reading from file /!\\");
         }
-        System.out.println("**** Computing path");
-        System.out.println("PATH NOT COMPUTED");
-        System.out.println("** End of MazeRunner");
+        logger.info("**** Computing path");
+        logger.debug("PATH NOT COMPUTED");
+        logger.info("** End of MazeRunner");
     }
 }
