@@ -91,7 +91,9 @@ public class Main {
         Maze maze = new Maze(matrix);
         AlgorithmExplorer explorer = new RightHandExplorer();
         maze.printMaze();
-        System.out.println(explorer.searchPath(maze));
+        String path = explorer.searchPath(maze);
+        System.out.println(path);
+        maze.verifyPath(path);
 
         logger.info("**** Computing path");
         logger.debug("PATH NOT COMPUTED");
