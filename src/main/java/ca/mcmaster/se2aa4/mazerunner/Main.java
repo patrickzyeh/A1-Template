@@ -17,7 +17,7 @@ public class Main {
 
     private static final Logger logger = LogManager.getLogger();
     private static String filePath;
-    private static Maze maze;
+    private static final List<boolean[]> matrix = new ArrayList<>();
 
     public static void main(String[] args) {
 
@@ -50,36 +50,48 @@ public class Main {
             BufferedReader reader = new BufferedReader(new FileReader(filePath)); // Read from file path supplied
             String line;
 
-            // Create a 2D Arraylist of bool which will be converted to a maze object
-
-            List<int[]> matrix = new ArrayList<>();
+            // Create a 2D Arraylist of int which will be converted to a maze object
 
             while ((line = reader.readLine()) != null) { // Read file line by line logging and adding to Arraylist
 
-                int[] row = new int[line.length()];
+                // Handles case where reader reads an empty line (Straight Path)
 
-                for (int idx = 0; idx < line.length(); idx++) {
-                    if (line.charAt(idx) == '#') {
-                        row[idx] = 0;
-                        System.out.print("WALL ");
-                    } else if (line.charAt(idx) == ' ') {
-                        row[idx] = 1;
-                        System.out.print("PASS ");
+                boolean[] row = (!line.isEmpty()) ? new boolean[line.length()]
+                        : new boolean[matrix.getLast().length];
+
+                if (line.isEmpty()) {
+                    for (int idx = 0; idx < row.length; idx++) {
+                        row[idx] = true;
+                        logger.trace("PASS ");
                     }
+                    logger.trace(System.lineSeparator());
+
+                } else {
+                    for (int idx = 0; idx < row.length; idx++) {
+                        if (line.charAt(idx) == '#') {
+                            row[idx] = false;
+                            logger.trace("WALL ");
+                        } else if (line.charAt(idx) == ' ') {
+                            row[idx] = true;
+                            logger.trace("PASS ");
+                        }
+                    }
+                    logger.trace(System.lineSeparator());
                 }
-                System.out.print(System.lineSeparator());
                 matrix.add(row);
             }
             reader.close();
 
-            // Initialize Maze object
-
-            maze = new Maze(matrix);
-            maze.printMaze();
-
         } catch (Exception e) {
-            logger.error("/!\\ An error has occured while reading from file /!\\");
+            logger.error("/!\\ An error has occurred while reading from file /!\\");
         }
+
+        // Initialize Maze object
+
+        Maze maze = new Maze(matrix);
+        AlgorithmExplorer explorer = new RightHandExplorer();
+        maze.printMaze();
+        System.out.println(explorer.searchPath(maze));
 
         logger.info("**** Computing path");
         logger.debug("PATH NOT COMPUTED");
