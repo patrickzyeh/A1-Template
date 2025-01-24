@@ -8,6 +8,8 @@ public class RightHandExplorer implements AlgorithmExplorer {
 
     @Override
 
+    // Method to search for a path and display it in Canonical form (Entering from the west)
+
     public String searchPath(Maze maze) {
 
         StringBuilder path = new StringBuilder();
@@ -107,7 +109,9 @@ public class RightHandExplorer implements AlgorithmExplorer {
         return path.toString();
     }
 
-    private static char changeDirection(char direction, boolean right) {
+    // Helper function to change direction
+
+    public static char changeDirection(char direction, boolean right) {
         char newDirection = ' ';
         if (right) {
             newDirection = switch (direction) {
