@@ -101,8 +101,6 @@ public class Maze {
             System.out.println("Correct Path!");
         }
         else {
-            System.out.println(row + " " + col);
-            System.out.println(exitRow + " " + exitCol);
             System.out.println("Incorrect Path!");
         }
     }
