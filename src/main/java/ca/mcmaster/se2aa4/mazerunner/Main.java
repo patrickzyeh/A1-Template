@@ -16,7 +16,8 @@ import org.apache.logging.log4j.Logger;
 public class Main {
 
     private static final Logger logger = LogManager.getLogger();
-    private static String filePath;
+    private static String filePath = null;
+    private static String mazePath;
     private static final List<boolean[]> matrix = new ArrayList<>();
 
     public static void main(String[] args) {
@@ -34,6 +35,9 @@ public class Main {
             CommandLine cmd = parser.parse(options, args); // Parses the command line arguments accordingly
             if (!cmd.hasOption("i")) {
                 throw new ParseException("Error parsing -i flag");
+            }
+            if (cmd.hasOption("p")){
+                mazePath = cmd.getOptionValue("p");
             }
             filePath = cmd.getOptionValue("i"); // Stores file path
             logger.trace("****** Parsed file name: " + filePath);
@@ -91,9 +95,12 @@ public class Main {
         Maze maze = new Maze(matrix);
         AlgorithmExplorer explorer = new RightHandExplorer();
         maze.printMaze();
-        String path = explorer.searchPath(maze);
-        System.out.println(path);
-        maze.verifyPath(path);
+
+        // CAN ONLY VERIFY CANONICAL PATH
+
+        if (mazePath != null){
+            maze.verifyPath(mazePath);
+        }
 
         logger.info("**** Computing path");
         logger.debug("PATH NOT COMPUTED");
