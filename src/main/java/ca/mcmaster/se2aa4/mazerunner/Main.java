@@ -94,12 +94,14 @@ public class Main {
 
         Maze maze = new Maze(matrix);
         AlgorithmExplorer explorer = new RightHandExplorer();
-        maze.printMaze();
 
         // CAN ONLY VERIFY CANONICAL PATH
 
         if (mazePath != null){
             maze.verifyPath(mazePath);
+        }
+        else{
+            System.out.println(explorer.searchPath(maze));
         }
 
         logger.info("**** Computing path");
