@@ -89,6 +89,13 @@ public class Maze {
                 direction = RightHandExplorer.changeDirection(direction, right);
             }
 
+            // Handles scenarios in which the provided path provides additional instructions after reaching the exit
+
+            if (col > exitCol){
+                System.out.println("Incorrect Path!");
+                return;
+            }
+
             if (!this.matrix.get(row)[col]){
                 System.out.println("Incorrect Path!");
                 return;
