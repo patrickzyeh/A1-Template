@@ -5,11 +5,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -28,7 +24,10 @@ public class Main {
 
         Options options = new Options();
         options.addOption("i", true, "Flag to indicate to program that a maze filepath will be provided"); // -i flag
-        options.addOption("p", true, "Flag to indicate to program to validate a path sequence"); // -p flag
+        options.addOption(Option.builder("p").hasArgs().valueSeparator(' ')
+                .desc("Flag to indicate to program to validate a path sequence")// -p flag
+                .build());
+
         CommandLineParser parser = new DefaultParser();
 
         try {
@@ -37,7 +36,8 @@ public class Main {
                 throw new ParseException("Error parsing -i flag");
             }
             if (cmd.hasOption("p")){
-                mazePath = cmd.getOptionValue("p");
+                String[] mazePathArray = cmd.getOptionValues("p");
+                mazePath = String.join("", mazePathArray);
             }
             filePath = cmd.getOptionValue("i"); // Stores file path
             logger.trace("****** Parsed file name: " + filePath);
@@ -101,7 +101,9 @@ public class Main {
             maze.verifyPath(mazePath);
         }
         else{
-            System.out.println(explorer.searchPath(maze));
+            Path path = explorer.findPath(maze);
+            path.displayFactorized();
+            path.displayCanonical();
         }
 
         logger.info("**** Computing path");
