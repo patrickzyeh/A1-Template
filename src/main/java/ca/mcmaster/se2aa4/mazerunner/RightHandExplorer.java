@@ -8,9 +8,9 @@ public class RightHandExplorer implements AlgorithmExplorer {
 
     @Override
 
-    // Method to search for a path and display it in Canonical form (Entering from the west)
+    // Method to search for a path and update the path attribute
 
-    public String searchPath(Maze maze) {
+    public Path findPath(Maze maze) {
 
         StringBuilder path = new StringBuilder();
 
@@ -105,8 +105,7 @@ public class RightHandExplorer implements AlgorithmExplorer {
                 break;
             }
         }
-
-        return path.toString();
+        return new Path(path.toString());
     }
 
     // Helper function to change direction
