@@ -98,16 +98,15 @@ public class Main {
         // CAN ONLY VERIFY CANONICAL PATH
 
         if (mazePath != null){
-            maze.verifyPath(mazePath);
+            logger.info("**** Verifying");
+            explorer.verifyPath(maze, mazePath);
         }
         else{
+            logger.info("**** Computing path");
             Path path = explorer.findPath(maze);
             path.displayFactorized();
-            path.displayCanonical();
         }
 
-        logger.info("**** Computing path");
-        logger.debug("PATH NOT COMPUTED");
         logger.info("** End of MazeRunner");
     }
 }
