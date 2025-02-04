@@ -95,11 +95,18 @@ public class Main {
         Maze maze = new Maze(matrix);
         AlgorithmExplorer explorer = new RightHandExplorer();
 
-        // CAN ONLY VERIFY CANONICAL PATH
+        // Verifies or computes path accordingly to supplied flag
 
         if (mazePath != null){
             logger.info("**** Verifying");
-            explorer.verifyPath(maze, mazePath);
+            if (explorer.verifyPath(maze, mazePath)){
+                System.out.println("Correct Path!");
+                logger.info("Path verified!");
+            }
+            else {
+                System.out.println("Incorrect path!");
+                logger.info("Path not verified!");
+            }
         }
         else{
             logger.info("**** Computing path");

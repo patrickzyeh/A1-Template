@@ -32,7 +32,7 @@ public class RightHandExplorer implements AlgorithmExplorer {
         List<boolean[]> matrix = maze.getMatrix();
         int row = maze.getWestEntry(); // Entry row
         int col = 0;
-        int directionIndex = 1; // Adding 1 to the index will turn right, Adding 3 will turn left
+        int directionIndex = 1; // Starts facing East, Adding 1 to the index will turn right, Adding 3 will turn left
 
         int endRow = maze.getEastEntry();
         int endCol = matrix.getFirst().length - 1;
@@ -91,8 +91,107 @@ public class RightHandExplorer implements AlgorithmExplorer {
 
     @Override
 
-    public void verifyPath(Maze maze, String path){
-        return;
+    public boolean verifyPath(Maze maze, String path){
+
+        boolean verified = false;
+        List<boolean[]> matrix = maze.getMatrix();
+
+        // Check west entrance first
+
+        int row = maze.getWestEntry();
+        int col = 0;
+        int exitRow = maze.getEastEntry();
+        int exitCol = matrix.getFirst().length - 1;
+        int directionIndex = 1; // Starts facing east
+        int i = 0;
+
+        while (i < path.length()) {
+
+            if (Character.isDigit(path.charAt(i))){
+
+                int repetition = Character.getNumericValue(path.charAt(i));
+                char repeat = path.charAt(i+1);
+
+                for (int j = 0; j < repetition; j++){
+                    if (repeat == 'F') {
+                        row = row + DIRECTIONS[directionIndex][0];
+                        col = col + DIRECTIONS[directionIndex][1];
+                    } else if (repeat == 'L') {
+                        directionIndex = (directionIndex + 3) % 4;
+                    } else {
+                        directionIndex = (directionIndex + 1) % 4;
+                    }
+                }
+                i++;
+            }
+
+            else if (path.charAt(i) == 'F') {
+                row = row + DIRECTIONS[directionIndex][0];
+                col = col + DIRECTIONS[directionIndex][1];
+            } else if (path.charAt(i) == 'L') {
+                directionIndex = (directionIndex + 3) % 4;
+            } else if (path.charAt(i) == 'R') {
+                directionIndex = (directionIndex + 1) % 4;
+            }
+            if (!isEmpty(matrix, row, col)) {
+                break;
+            }
+            i++;
+        }
+
+        if (row == exitRow && col == exitCol){
+            verified = true;
+            return verified;
+        }
+
+        // Check east entrance if west entrance is not verified
+
+        row = exitRow;
+        col = exitCol;
+        exitRow = maze.getWestEntry();
+        exitCol = 0;
+        directionIndex = 3; // Starts facing west
+        i = 0;
+
+        while (i < path.length()) {
+
+            if (Character.isDigit(path.charAt(i))){
+
+                int repetition = Character.getNumericValue(path.charAt(i));
+                char repeat = path.charAt(i+1);
+
+                for (int j = 0; j < repetition; j++){
+                    if (repeat == 'F') {
+                        row = row + DIRECTIONS[directionIndex][0];
+                        col = col + DIRECTIONS[directionIndex][1];
+                    } else if (repeat == 'L') {
+                        directionIndex = (directionIndex + 3) % 4;
+                    } else {
+                        directionIndex = (directionIndex + 1) % 4;
+                    }
+                }
+                i++;
+            }
+
+            else if (path.charAt(i) == 'F') {
+                row = row + DIRECTIONS[directionIndex][0];
+                col = col + DIRECTIONS[directionIndex][1];
+            } else if (path.charAt(i) == 'L') {
+                directionIndex = (directionIndex + 3) % 4;
+            } else if (path.charAt(i) == 'R') {
+                directionIndex = (directionIndex + 1) % 4;
+            }
+            if (!isEmpty(matrix, row, col)) {
+                break;
+            }
+            i++;
+        }
+
+        if (row == exitRow && col == exitCol){
+            verified = true;
+        }
+
+        return verified;
     }
 
     // Helper method to verify if a certain row, col index is empty or not
