@@ -21,26 +21,24 @@ public class Maze {
     }
 
     public int getWestEntry() {
-        int entry = 0;
 
-        for (int i = 0; i < this.matrix.size(); i++) {
+        for (int i = 0; i < this.matrix.size() - 1; i++) {
             if (this.matrix.get(i)[0]) {
-                entry = i;
+                return i;
             }
         }
-        return entry;
+        return -1;
     }
 
     public int getEastEntry() {
-        int entry = 0;
         int lastCol = this.matrix.getFirst().length - 1;
+        for (int i = 0; i < this.matrix.size() - 1; i++) {
 
-        for (int i = 0; i < this.matrix.size(); i++) {
             if (this.matrix.get(i)[lastCol]) {
-                entry = i;
+                return i;
             }
         }
-        return entry;
+        return -1;
     }
 
     // Print Maze Method
@@ -48,10 +46,9 @@ public class Maze {
     public void printMaze() {
         for (boolean[] row : this.matrix) {
             for (boolean i : row) {
-                if (i){
+                if (i) {
                     System.out.print(" ");
-                }
-                else{
+                } else {
                     System.out.print("#");
                 }
             }

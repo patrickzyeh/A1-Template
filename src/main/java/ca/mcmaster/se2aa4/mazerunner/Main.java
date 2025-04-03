@@ -1,20 +1,20 @@
 package ca.mcmaster.se2aa4.mazerunner;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class Main {
 
     private static final Logger logger = LogManager.getLogger();
+    private static FileParser fileParser = new FileParser();
     private static String filePath = null;
     private static String mazePath;
-    private static final List<boolean[]> matrix = new ArrayList<>();
 
     public static void main(String[] args) {
 
@@ -35,7 +35,7 @@ public class Main {
             if (!cmd.hasOption("i")) {
                 throw new ParseException("Error parsing -i flag");
             }
-            if (cmd.hasOption("p")){
+            if (cmd.hasOption("p")) {
                 String[] mazePathArray = cmd.getOptionValues("p");
                 mazePath = String.join("", mazePathArray);
             }
@@ -46,72 +46,27 @@ public class Main {
             System.exit(1); // Terminate program if errors with parsing
         }
 
-        // Reading parsed file
-
-        logger.info("** Starting Maze Runner");
-        try {
-            logger.info("**** Reading the maze from file " + filePath);
-            BufferedReader reader = new BufferedReader(new FileReader(filePath)); // Read from file path supplied
-            String line;
-
-            // Create a 2D Arraylist of int which will be converted to a maze object
-
-            while ((line = reader.readLine()) != null) { // Read file line by line logging and adding to Arraylist
-
-                // Handles case where reader reads an empty line (Straight Path)
-
-                boolean[] row = (!line.isEmpty()) ? new boolean[line.length()]
-                        : new boolean[matrix.getLast().length];
-
-                if (line.isEmpty()) {
-                    for (int idx = 0; idx < row.length; idx++) {
-                        row[idx] = true;
-                        logger.trace("PASS ");
-                    }
-                    logger.trace(System.lineSeparator());
-
-                } else {
-                    for (int idx = 0; idx < row.length; idx++) {
-                        if (line.charAt(idx) == '#') {
-                            row[idx] = false;
-                            logger.trace("WALL ");
-                        } else if (line.charAt(idx) == ' ') {
-                            row[idx] = true;
-                            logger.trace("PASS ");
-                        }
-                    }
-                    logger.trace(System.lineSeparator());
-                }
-                matrix.add(row);
-            }
-            reader.close();
-
-        } catch (Exception e) {
-            logger.error("/!\\ An error has occurred while reading from file /!\\");
-        }
-
         // Initialize Maze object
 
-        Maze maze = new Maze(matrix);
+        Maze maze = fileParser.parseFile(filePath);
+        maze.printMaze();
         AlgorithmExplorer explorer = new RightHandExplorer();
 
         // Verifies or computes path accordingly to supplied flag
 
-        if (mazePath != null){
+        if (mazePath != null) {
             logger.info("**** Verifying");
-            if (explorer.verifyPath(maze, mazePath)){
+            if (explorer.verifyPath(maze, mazePath)) {
                 System.out.println("Correct Path!");
                 logger.info("Path verified!");
-            }
-            else {
+            } else {
                 System.out.println("Incorrect path!");
                 logger.info("Path not verified!");
             }
-        }
-        else{
+        } else {
             logger.info("**** Computing path");
             Path path = explorer.findPath(maze);
-            path.displayFactorized();
+            System.out.println(path.getFactorized());
         }
 
         logger.info("** End of MazeRunner");

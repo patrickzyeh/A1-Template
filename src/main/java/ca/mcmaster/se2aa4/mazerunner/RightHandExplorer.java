@@ -1,18 +1,20 @@
 package ca.mcmaster.se2aa4.mazerunner;
 
 import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class RightHandExplorer implements AlgorithmExplorer {
 
-    // Represents the change of row and col when moving forwards from a certain direction {row, col}
+    // Represents the change of row and col when moving forwards from a certain
+    // direction {row, col}
 
     private static final int[][] DIRECTIONS = {
-            {-1,0}, // North
-            {0,1}, // East
-            {1,0}, // South
-            {0,-1} // West
+            { -1, 0 }, // North
+            { 0, 1 }, // East
+            { 1, 0 }, // South
+            { 0, -1 } // West
     };
 
     private static final Logger logger = LogManager.getLogger();
@@ -32,19 +34,22 @@ public class RightHandExplorer implements AlgorithmExplorer {
         List<boolean[]> matrix = maze.getMatrix();
         int row = maze.getWestEntry(); // Entry row
         int col = 0;
-        int directionIndex = 1; // Starts facing East, Adding 1 to the index will turn right, Adding 3 will turn left
+        int directionIndex = 1; // Starts facing East, Adding 1 to the index will turn right, Adding 3 will turn
+                                // left
 
         int endRow = maze.getEastEntry();
         int endCol = matrix.getFirst().length - 1;
 
-        /* Right Hand Algorithm
-        (Idea is to "hug" the right wall)
-        If you cant go right, go forwards
-        If you cant go right or forwards, go left */
+        /*
+         * Right Hand Algorithm
+         * (Idea is to "hug" the right wall)
+         * If you cant go right, go forwards
+         * If you cant go right or forwards, go left
+         */
 
         logger.info("Finding Path via Right Hand Algorithm...");
 
-        while (row != endRow || col != endCol){
+        while (row != endRow || col != endCol) {
 
             // Try going right first
 
@@ -54,7 +59,7 @@ public class RightHandExplorer implements AlgorithmExplorer {
 
             // Checks if the forward square is empty
 
-            if(isEmpty(matrix, forwardRow, forwardCol)){
+            if (isEmpty(matrix, forwardRow, forwardCol)) {
                 path.append("RF");
                 row = forwardRow;
                 col = forwardCol;
@@ -64,18 +69,18 @@ public class RightHandExplorer implements AlgorithmExplorer {
 
             // Try going forwards if you cant go right
 
-            else{
+            else {
                 forwardRow = row + DIRECTIONS[directionIndex][0];
                 forwardCol = col + DIRECTIONS[directionIndex][1];
 
-                if(isEmpty(matrix, forwardRow, forwardCol)){
+                if (isEmpty(matrix, forwardRow, forwardCol)) {
                     path.append("F");
                     row = forwardRow;
                     col = forwardCol;
                     logger.info("Going forwards");
                 }
                 // Cant go right or forwards, go left
-                else{
+                else {
                     directionIndex = (directionIndex + 3) % 4;
                     path.append('L');
                     logger.info("Going Left");
@@ -91,7 +96,7 @@ public class RightHandExplorer implements AlgorithmExplorer {
 
     @Override
 
-    public boolean verifyPath(Maze maze, String path){
+    public boolean verifyPath(Maze maze, String path) {
 
         boolean verified = false;
         List<boolean[]> matrix = maze.getMatrix();
@@ -107,12 +112,12 @@ public class RightHandExplorer implements AlgorithmExplorer {
 
         while (i < path.length()) {
 
-            if (Character.isDigit(path.charAt(i))){
+            if (Character.isDigit(path.charAt(i))) {
 
                 int repetition = Character.getNumericValue(path.charAt(i));
-                char repeat = path.charAt(i+1);
+                char repeat = path.charAt(i + 1);
 
-                for (int j = 0; j < repetition; j++){
+                for (int j = 0; j < repetition; j++) {
                     if (repeat == 'F') {
                         row = row + DIRECTIONS[directionIndex][0];
                         col = col + DIRECTIONS[directionIndex][1];
@@ -139,7 +144,7 @@ public class RightHandExplorer implements AlgorithmExplorer {
             i++;
         }
 
-        if (row == exitRow && col == exitCol){
+        if (row == exitRow && col == exitCol) {
             verified = true;
             return verified;
         }
@@ -155,12 +160,12 @@ public class RightHandExplorer implements AlgorithmExplorer {
 
         while (i < path.length()) {
 
-            if (Character.isDigit(path.charAt(i))){
+            if (Character.isDigit(path.charAt(i))) {
 
                 int repetition = Character.getNumericValue(path.charAt(i));
-                char repeat = path.charAt(i+1);
+                char repeat = path.charAt(i + 1);
 
-                for (int j = 0; j < repetition; j++){
+                for (int j = 0; j < repetition; j++) {
                     if (repeat == 'F') {
                         row = row + DIRECTIONS[directionIndex][0];
                         col = col + DIRECTIONS[directionIndex][1];
@@ -187,7 +192,7 @@ public class RightHandExplorer implements AlgorithmExplorer {
             i++;
         }
 
-        if (row == exitRow && col == exitCol){
+        if (row == exitRow && col == exitCol) {
             verified = true;
         }
 
@@ -196,8 +201,9 @@ public class RightHandExplorer implements AlgorithmExplorer {
 
     // Helper method to verify if a certain row, col index is empty or not
 
-    private static boolean isEmpty(List<boolean[]> matrix, int row, int col){
-        return (0 <= col && col < matrix.getFirst().length) && (0 <= row && row < matrix.size()) && (matrix.get(row)[col]);
+    private static boolean isEmpty(List<boolean[]> matrix, int row, int col) {
+        return (0 <= col && col < matrix.getFirst().length) && (0 <= row && row < matrix.size())
+                && (matrix.get(row)[col]);
     }
 
 }
