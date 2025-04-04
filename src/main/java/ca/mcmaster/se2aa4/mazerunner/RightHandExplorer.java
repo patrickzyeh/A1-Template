@@ -81,14 +81,33 @@ public class RightHandExplorer implements AlgorithmExplorer {
     public boolean verifyPath(Maze maze, String path) {
 
         List<boolean[]> matrix = maze.getMatrix();
+
+        int westEntry = maze.getWestEntry();
+        int eastEntry = maze.getEastEntry();
+        int eastEndCol = 0;
+        int westEndCol = matrix.getFirst().length - 1;
+
+        Marker westMarker = new Marker(westEntry, 0, 1);
+        Marker eastMarker = new Marker(eastEntry, matrix.getFirst().length - 1, 3);
+
+        boolean validWest = checkEntry(matrix, westMarker, eastEntry, westEndCol, path);
+        boolean validEast = checkEntry(matrix, eastMarker, westEntry, eastEndCol, path);
+
+        return validWest || validEast;
+    }
+
+    // Helper method to verify if a certain row, col index is empty or not
+
+    private static boolean isEmpty(List<boolean[]> matrix, int row, int col) {
+        return (0 <= col && col < matrix.getFirst().length) && (0 <= row && row < matrix.size())
+                && (matrix.get(row)[col]);
+    }
+
+    // Helper method to check entrances
+
+    private static boolean checkEntry(List<boolean[]> matrix, Marker marker, int endRow, int endCol, String path) {
+
         MoveCommand moveCommand;
-        boolean verified = false;
-
-        // Check west entrance first
-
-        int endRow = maze.getEastEntry();
-        int endCol = matrix.getFirst().length - 1;
-        Marker marker = new Marker(maze.getWestEntry(), 0, 1);
         int i = 0;
 
         while (i < path.length()) {
@@ -129,68 +148,7 @@ public class RightHandExplorer implements AlgorithmExplorer {
             i++;
         }
 
-        if (marker.getRow() == endRow && marker.getCol() == endCol) {
-            verified = true;
-            return verified;
-        }
-
-        // Check east entrance if west entrance is not verified
-
-        marker = new Marker(endRow, endCol, 3);
-        endRow = maze.getWestEntry();
-        endCol = 0;
-        i = 0;
-
-        while (i < path.length()) {
-
-            if (Character.isDigit(path.charAt(i))) {
-
-                int repetition = Character.getNumericValue(path.charAt(i));
-                char repeat = path.charAt(i + 1);
-
-                for (int j = 0; j < repetition; j++) {
-                    if (repeat == 'F') {
-                        moveCommand = new ForwardCommand(marker);
-                        moveCommand.execute();
-                    } else if (repeat == 'L') {
-                        moveCommand = new LeftCommand(marker);
-                        moveCommand.execute();
-                    } else {
-                        moveCommand = new RightCommand(marker);
-                        moveCommand.execute();
-                    }
-                }
-                i++;
-            }
-
-            else if (path.charAt(i) == 'F') {
-                moveCommand = new ForwardCommand(marker);
-                moveCommand.execute();
-            } else if (path.charAt(i) == 'L') {
-                moveCommand = new LeftCommand(marker);
-                moveCommand.execute();
-            } else if (path.charAt(i) == 'R') {
-                moveCommand = new RightCommand(marker);
-                moveCommand.execute();
-            }
-            if (!isEmpty(matrix, marker.getRow(), marker.getCol())) {
-                break;
-            }
-            i++;
-        }
-
-        if (marker.getRow() == endRow && marker.getCol() == endCol) {
-            verified = true;
-        }
-
-        return verified;
-    }
-
-    // Helper method to verify if a certain row, col index is empty or not
-
-    private static boolean isEmpty(List<boolean[]> matrix, int row, int col) {
-        return (0 <= col && col < matrix.getFirst().length) && (0 <= row && row < matrix.size())
-                && (matrix.get(row)[col]);
+        return marker.getRow() == endRow && marker.getCol() == endCol;
     }
 
 }
