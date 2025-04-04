@@ -16,4 +16,9 @@ public class RightCommand implements MoveCommand {
     public void undo() {
         marker.turnLeft();
     }
+
+    @Override
+    public char getCommandChar() {
+        return 'R';
+    }
 }

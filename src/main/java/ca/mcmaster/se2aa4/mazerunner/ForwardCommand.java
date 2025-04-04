@@ -16,4 +16,9 @@ public class ForwardCommand implements MoveCommand {
     public void undo() {
         marker.moveBackward();
     }
+
+    @Override
+    public char getCommandChar() {
+        return 'F';
+    }
 }

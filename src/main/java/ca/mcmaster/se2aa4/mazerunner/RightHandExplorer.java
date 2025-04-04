@@ -15,11 +15,13 @@ public class RightHandExplorer implements AlgorithmExplorer {
 
     public Path findPath(Maze maze) {
 
-        // Initialize a string builder to build a path
-        StringBuilder path = new StringBuilder();
-
+        // Initialize a path create to build a path
+        PathCreator pathCreator = new PathCreator();
         // Instantiate a command history to track command calls
         CommandHistory history = new CommandHistory();
+
+        // Add pathCreator as an Observer to history
+        history.attachObserver(pathCreator);
 
         // Variables for traversing the maze
         List<boolean[]> matrix = maze.getMatrix();
@@ -44,7 +46,6 @@ public class RightHandExplorer implements AlgorithmExplorer {
             history.push(new ForwardCommand(marker));
 
             if (isEmpty(matrix, marker.getRow(), marker.getCol())) {
-                path.append("RF");
                 logger.info("Going right");
                 logger.info("Going forwards");
             }
@@ -58,21 +59,19 @@ public class RightHandExplorer implements AlgorithmExplorer {
                 history.push(new ForwardCommand(marker));
 
                 if (isEmpty(matrix, marker.getRow(), marker.getCol())) {
-                    path.append("F");
                     logger.info("Going forwards");
                 }
                 // If forward square is not empty, undo the forward, and go left
                 else {
                     history.pop();
                     history.push(new LeftCommand(marker));
-                    path.append('L');
                     logger.info("Going Left");
                 }
             }
             history.clear();
         }
         logger.info("Path Found!");
-        return new Path(path.toString());
+        return new Path(pathCreator.toString());
     }
 
     // Method to Verify Path

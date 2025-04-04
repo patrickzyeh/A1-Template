@@ -4,4 +4,6 @@ public interface MoveCommand {
     public abstract void execute();
 
     public abstract void undo();
+
+    public abstract char getCommandChar();
 }
