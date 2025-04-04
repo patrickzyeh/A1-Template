@@ -12,7 +12,7 @@ import org.apache.logging.log4j.Logger;
 public class Main {
 
     private static final Logger logger = LogManager.getLogger();
-    private static FileParser fileParser = new FileParser();
+    private static final FileParser fileParser = new FileParser();
     private static String filePath = null;
     private static String mazePath;
 
@@ -46,10 +46,9 @@ public class Main {
             System.exit(1); // Terminate program if errors with parsing
         }
 
-        // Initialize Maze object
+        // Parse maze from file and initialize Maze object
 
         Maze maze = fileParser.parseFile(filePath);
-        maze.printMaze();
         AlgorithmExplorer explorer = new RightHandExplorer();
 
         // Verifies or computes path accordingly to supplied flag

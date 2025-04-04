@@ -7,16 +7,6 @@ import org.apache.logging.log4j.Logger;
 
 public class RightHandExplorer implements AlgorithmExplorer {
 
-    // Represents the change of row and col when moving forwards from a certain
-    // direction {row, col}
-
-    private static final int[][] DIRECTIONS = {
-            { -1, 0 }, // North
-            { 0, 1 }, // East
-            { 1, 0 }, // South
-            { 0, -1 } // West
-    };
-
     private static final Logger logger = LogManager.getLogger();
 
     // Method to search for a path and update the path attribute
@@ -26,16 +16,14 @@ public class RightHandExplorer implements AlgorithmExplorer {
     public Path findPath(Maze maze) {
 
         // Initialize a string builder to build a path
-
         StringBuilder path = new StringBuilder();
 
-        // Variables for traversing the maze
+        // Instantiate a command history to track command calls
+        CommandHistory history = new CommandHistory();
 
+        // Variables for traversing the maze
         List<boolean[]> matrix = maze.getMatrix();
-        int row = maze.getWestEntry(); // Entry row
-        int col = 0;
-        int directionIndex = 1; // Starts facing East, Adding 1 to the index will turn right, Adding 3 will turn
-                                // left
+        Marker marker = new Marker(maze.getWestEntry(), 0, 1);
 
         int endRow = maze.getEastEntry();
         int endCol = matrix.getFirst().length - 1;
@@ -49,44 +37,39 @@ public class RightHandExplorer implements AlgorithmExplorer {
 
         logger.info("Finding Path via Right Hand Algorithm...");
 
-        while (row != endRow || col != endCol) {
+        while (marker.getRow() != endRow || marker.getCol() != endCol) {
 
-            // Try going right first
+            // Try going right and forwards
+            history.push(new RightCommand(marker));
+            history.push(new ForwardCommand(marker));
 
-            int directionFaced = (directionIndex + 1) % 4;
-            int forwardRow = row + DIRECTIONS[directionFaced][0];
-            int forwardCol = col + DIRECTIONS[directionFaced][1];
-
-            // Checks if the forward square is empty
-
-            if (isEmpty(matrix, forwardRow, forwardCol)) {
+            if (isEmpty(matrix, marker.getRow(), marker.getCol())) {
                 path.append("RF");
-                row = forwardRow;
-                col = forwardCol;
-                directionIndex = directionFaced;
                 logger.info("Going right");
+                logger.info("Going forwards");
             }
 
-            // Try going forwards if you cant go right
+            // If forward square is not empty, undo the right turn and go forwards
 
             else {
-                forwardRow = row + DIRECTIONS[directionIndex][0];
-                forwardCol = col + DIRECTIONS[directionIndex][1];
 
-                if (isEmpty(matrix, forwardRow, forwardCol)) {
+                history.pop();
+                history.pop();
+                history.push(new ForwardCommand(marker));
+
+                if (isEmpty(matrix, marker.getRow(), marker.getCol())) {
                     path.append("F");
-                    row = forwardRow;
-                    col = forwardCol;
                     logger.info("Going forwards");
                 }
-                // Cant go right or forwards, go left
+                // If forward square is not empty, undo the forward, and go left
                 else {
-                    directionIndex = (directionIndex + 3) % 4;
+                    history.pop();
+                    history.push(new LeftCommand(marker));
                     path.append('L');
                     logger.info("Going Left");
                 }
             }
-
+            history.clear();
         }
         logger.info("Path Found!");
         return new Path(path.toString());
@@ -98,16 +81,15 @@ public class RightHandExplorer implements AlgorithmExplorer {
 
     public boolean verifyPath(Maze maze, String path) {
 
-        boolean verified = false;
         List<boolean[]> matrix = maze.getMatrix();
+        MoveCommand moveCommand;
+        boolean verified = false;
 
         // Check west entrance first
 
-        int row = maze.getWestEntry();
-        int col = 0;
-        int exitRow = maze.getEastEntry();
-        int exitCol = matrix.getFirst().length - 1;
-        int directionIndex = 1; // Starts facing east
+        int endRow = maze.getEastEntry();
+        int endCol = matrix.getFirst().length - 1;
+        Marker marker = new Marker(maze.getWestEntry(), 0, 1);
         int i = 0;
 
         while (i < path.length()) {
@@ -119,43 +101,45 @@ public class RightHandExplorer implements AlgorithmExplorer {
 
                 for (int j = 0; j < repetition; j++) {
                     if (repeat == 'F') {
-                        row = row + DIRECTIONS[directionIndex][0];
-                        col = col + DIRECTIONS[directionIndex][1];
+                        moveCommand = new ForwardCommand(marker);
+                        moveCommand.execute();
                     } else if (repeat == 'L') {
-                        directionIndex = (directionIndex + 3) % 4;
+                        moveCommand = new LeftCommand(marker);
+                        moveCommand.execute();
                     } else {
-                        directionIndex = (directionIndex + 1) % 4;
+                        moveCommand = new RightCommand(marker);
+                        moveCommand.execute();
                     }
                 }
                 i++;
             }
 
             else if (path.charAt(i) == 'F') {
-                row = row + DIRECTIONS[directionIndex][0];
-                col = col + DIRECTIONS[directionIndex][1];
+                moveCommand = new ForwardCommand(marker);
+                moveCommand.execute();
             } else if (path.charAt(i) == 'L') {
-                directionIndex = (directionIndex + 3) % 4;
+                moveCommand = new LeftCommand(marker);
+                moveCommand.execute();
             } else if (path.charAt(i) == 'R') {
-                directionIndex = (directionIndex + 1) % 4;
+                moveCommand = new RightCommand(marker);
+                moveCommand.execute();
             }
-            if (!isEmpty(matrix, row, col)) {
+            if (!isEmpty(matrix, marker.getRow(), marker.getCol())) {
                 break;
             }
             i++;
         }
 
-        if (row == exitRow && col == exitCol) {
+        if (marker.getRow() == endRow && marker.getCol() == endCol) {
             verified = true;
             return verified;
         }
 
         // Check east entrance if west entrance is not verified
 
-        row = exitRow;
-        col = exitCol;
-        exitRow = maze.getWestEntry();
-        exitCol = 0;
-        directionIndex = 3; // Starts facing west
+        marker = new Marker(endRow, endCol, 3);
+        endRow = maze.getWestEntry();
+        endCol = 0;
         i = 0;
 
         while (i < path.length()) {
@@ -167,32 +151,36 @@ public class RightHandExplorer implements AlgorithmExplorer {
 
                 for (int j = 0; j < repetition; j++) {
                     if (repeat == 'F') {
-                        row = row + DIRECTIONS[directionIndex][0];
-                        col = col + DIRECTIONS[directionIndex][1];
+                        moveCommand = new ForwardCommand(marker);
+                        moveCommand.execute();
                     } else if (repeat == 'L') {
-                        directionIndex = (directionIndex + 3) % 4;
+                        moveCommand = new LeftCommand(marker);
+                        moveCommand.execute();
                     } else {
-                        directionIndex = (directionIndex + 1) % 4;
+                        moveCommand = new RightCommand(marker);
+                        moveCommand.execute();
                     }
                 }
                 i++;
             }
 
             else if (path.charAt(i) == 'F') {
-                row = row + DIRECTIONS[directionIndex][0];
-                col = col + DIRECTIONS[directionIndex][1];
+                moveCommand = new ForwardCommand(marker);
+                moveCommand.execute();
             } else if (path.charAt(i) == 'L') {
-                directionIndex = (directionIndex + 3) % 4;
+                moveCommand = new LeftCommand(marker);
+                moveCommand.execute();
             } else if (path.charAt(i) == 'R') {
-                directionIndex = (directionIndex + 1) % 4;
+                moveCommand = new RightCommand(marker);
+                moveCommand.execute();
             }
-            if (!isEmpty(matrix, row, col)) {
+            if (!isEmpty(matrix, marker.getRow(), marker.getCol())) {
                 break;
             }
             i++;
         }
 
-        if (row == exitRow && col == exitCol) {
+        if (marker.getRow() == endRow && marker.getCol() == endCol) {
             verified = true;
         }
 
